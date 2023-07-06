@@ -1,0 +1,152 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using DBModels;
+
+namespace Model.DAL
+{
+    public class AccountDAL : IAccountDAL
+    {
+        private readonly string _connectionString;
+
+        public WalletRepository(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
+
+        public void RegisterAccounts(Accounts accounts)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SqlCommand("INSERT INTO Accountss (UserName, AccountNumber, Password, Balance, RegisterDate) VALUES (@UserName, @AccountNumber, @Password, @Balance, @RegisterDate)", connection))
+                {
+                    command.Parameters.AddWithValue("@UserName", accounts.UserName);
+                    command.Parameters.AddWithValue("@AccountNumber", accounts.AccountNumber);
+                    command.Parameters.AddWithValue("@Password", accounts.Password);
+                    command.Parameters.AddWithValue("@Balance", accounts.Balance);
+                    command.Parameters.AddWithValue("@RegisterDate", accounts.RegisterDate);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public Accounts GetAccountsByLoginName(string loginName)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SqlCommand("SELECT * FROM Accountss WHERE UserName = @UserName", connection))
+                {
+                    command.Parameters.AddWithValue("@UserName", loginName);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new Accounts
+                            {
+                                UserName = reader.GetString(reader.GetOrdinal("UserName")),
+                                AccountNumber = reader.GetString(reader.GetOrdinal("AccountNumber")),
+                                Password = reader.GetString(reader.GetOrdinal("Password")),
+                                Balance = reader.GetDecimal(reader.GetOrdinal("Balance")),
+                                RegisterDate = reader.GetDateTime(reader.GetOrdinal("RegisterDate"))
+                            };
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public void UpdateAccounts(Accounts account)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SqlCommand("UPDATE Accounts SET Balance = @Balance WHERE AccountNumber = @AccountNumber", connection))
+                {
+                    command.Parameters.AddWithValue("@Balance", account.Balance);
+                    command.Parameters.AddWithValue("@AccountNumber", account.AccountNumber);
+
+                    var retryCount = 0;
+                    var maxRetries = 3;
+                    while (true)
+                    {
+                        try
+                        {
+                            command.ExecuteNonQuery();
+                            break;
+                        }
+                        catch (SqlException ex) when (ex.Number == 1205 && retryCount < maxRetries)
+                        {
+                            // Deadlock occurred, retry the operation
+                            retryCount++;
+                            continue;
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log or handle the exception accordingly
+                            throw;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void AddTransaction(Transactions transaction)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SqlCommand("INSERT INTO Transactions (TransactionType, Amount, AccountNumberFrom, AccountNumberTo, DateOfTransaction, EndBalance) VALUES (@TransactionType, @Amount, @AccountNumberFrom, @AccountNumberTo, @DateOfTransaction, @EndBalance)", connection))
+                {
+                    command.Parameters.AddWithValue("@TransactionType", transaction.TransactionType);
+                    command.Parameters.AddWithValue("@Amount", transaction.Amount);
+                    command.Parameters.AddWithValue("@AccountNumberFrom", transaction.AccountNumberFrom);
+                    command.Parameters.AddWithValue("@AccountNumberTo", transaction.AccountNumberTo);
+                    command.Parameters.AddWithValue("@DateOfTransaction", transaction.DateOfTransaction);
+                    command.Parameters.AddWithValue("@EndBalance", transaction.EndBalance);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public List<Transactions> GetTransactionsByAccountNumber(string accountNumber)
+        {
+            var transactions = new List<Transactions>();
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SqlCommand("SELECT * FROM Transactions WHERE AccountNumberFrom = @AccountNumber OR AccountNumberTo = @AccountNumber ORDER BY DateOfTransaction DESC", connection))
+                {
+                    command.Parameters.AddWithValue("@AccountNumber", accountNumber);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var transaction = new Transactions
+                            {
+                                TransactionType = reader.GetString(reader.GetOrdinal("TransactionType")),
+                                Amount = reader.GetDecimal(reader.GetOrdinal("Amount")),
+                                AccountNumberFrom = reader.GetString(reader.GetOrdinal("AccountNumberFrom")),
+                                AccountNumberTo = reader.GetString(reader.GetOrdinal("AccountNumberTo")),
+                                DateOfTransaction = reader.GetDateTime(reader.GetOrdinal("DateOfTransaction")),
+                                EndBalance = reader.GetDecimal(reader.GetOrdinal("EndBalance"))
+                            };
+
+                            transactions.Add(transaction);
+                        }
+                    }
+                }
+            }
+
+            return transactions;
+        }
+    }
+}

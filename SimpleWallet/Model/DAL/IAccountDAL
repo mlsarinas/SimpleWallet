@@ -1,0 +1,7 @@
+namespace Model.DAL
+{
+    public interface IAccountDAL
+    {
+        
+    }
+}
