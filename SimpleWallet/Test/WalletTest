@@ -1,0 +1,131 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
+using WalletSystem;
+
+namespace WalletSystemTests
+{
+    [TestClass]
+    public class WalletSystemTests
+    {
+        private static IConfiguration _configuration;
+        private static IWalletRepository _repository;
+
+        [ClassInitialize]
+        public static void Initialize(TestContext context)
+        {
+            // Load configuration
+            var configBuilder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            _configuration = configBuilder.Build();
+
+            // Create repository instance
+            _repository = new WalletRepository(_configuration);
+        }
+
+        [TestMethod]
+        public void RegisterUser_NewUser_UserRegisteredSuccessfully()
+        {
+            // Arrange
+            var user = new User
+            {
+                LoginName = "testuser",
+                AccountNumber = GenerateAccountNumber(),
+                Password = "password123",
+                Balance = 0,
+                RegisterDate = DateTime.Now
+            };
+
+            // Act
+            _repository.RegisterUser(user);
+            var registeredUser = _repository.GetUserByLoginName(user.LoginName);
+
+            // Assert
+            Assert.IsNotNull(registeredUser);
+            Assert.AreEqual(user.LoginName, registeredUser.LoginName);
+        }
+
+        [TestMethod]
+        public void UpdateUser_BalanceUpdatedSuccessfully()
+        {
+            // Arrange
+            var user = _repository.GetUserByLoginName("testuser");
+            if (user != null)
+            {
+                var initialBalance = user.Balance;
+                var depositAmount = 100;
+
+                // Act
+                user.Balance += depositAmount;
+                _repository.UpdateUser(user);
+                var updatedUser = _repository.GetUserByLoginName(user.LoginName);
+
+                // Assert
+                Assert.IsNotNull(updatedUser);
+                Assert.AreEqual(initialBalance + depositAmount, updatedUser.Balance);
+            }
+            else
+            {
+                Assert.Fail("User not found.");
+            }
+        }
+
+        [TestMethod]
+        public void AddTransaction_TransactionAddedSuccessfully()
+        {
+            // Arrange
+            var sender = _repository.GetUserByLoginName("testuser");
+            var receiver = _repository.GetUserByLoginName("jane_smith");
+            if (sender != null && receiver != null)
+            {
+                var initialSenderBalance = sender.Balance;
+                var initialReceiverBalance = receiver.Balance;
+                var transferAmount = 50;
+
+                // Act
+                var transactionFrom = new Transaction
+                {
+                    TransactionType = "Transfer",
+                    Amount = transferAmount,
+                    AccountNumberFrom = sender.AccountNumber,
+                    AccountNumberTo = receiver.AccountNumber,
+                    DateOfTransaction = DateTime.Now,
+                    EndBalance = sender.Balance - transferAmount
+                };
+                var transactionTo = new Transaction
+                {
+                    TransactionType = "Transfer",
+                    Amount = transferAmount,
+                    AccountNumberFrom = sender.AccountNumber,
+                    AccountNumberTo = receiver.AccountNumber,
+                    DateOfTransaction = DateTime.Now,
+                    EndBalance = receiver.Balance + transferAmount
+                };
+
+                _repository.AddTransaction(transactionFrom);
+                _repository.AddTransaction(transactionTo);
+
+                // Assert
+                sender = _repository.GetUserByLoginName("testuser");
+                receiver = _repository.GetUserByLoginName("jane_smith");
+
+                Assert.IsNotNull(sender);
+                Assert.IsNotNull(receiver);
+                Assert.AreEqual(initialSenderBalance - transferAmount, sender.Balance);
+                Assert.AreEqual(initialReceiverBalance + transferAmount, receiver.Balance);
+            }
+            else
+            {
+                Assert.Fail("Sender or receiver not found.");
+            }
+        }
+
+        private static string GenerateAccountNumber()
+        {
+            var random = new Random();
+            return random.Next(100000000000, 999999999999).ToString();
+        }
+    }
+}
