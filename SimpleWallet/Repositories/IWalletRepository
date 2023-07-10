@@ -1,0 +1,14 @@
+using System;
+using System.Collections.Generic;
+
+namespace WalletSystem
+{
+    public interface IWalletRepository
+    {
+        void RegisterAccounts(Accounts acct);
+        Accounts GetAccountsByLoginName(string loginName);
+        void UpdateAccounts(Accounts acct);
+        void AddTransaction(Transaction transaction);
+        List<Transaction> GetTransactionsByAccountNumber(string accountNumber);
+    }
+}

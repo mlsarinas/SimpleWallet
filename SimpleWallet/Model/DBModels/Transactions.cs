@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace DBModels
 {
     public class Transaction
