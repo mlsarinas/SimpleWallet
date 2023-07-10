@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using DBModels;
 
-namespace Model.DAL
+namespace DAL
 {
     public class AccountDAL : IAccountDAL
     {
@@ -21,7 +21,7 @@ namespace Model.DAL
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new SqlCommand("INSERT INTO Accountss (UserName, AccountNumber, Password, Balance, RegisterDate) VALUES (@UserName, @AccountNumber, @Password, @Balance, @RegisterDate)", connection))
+                using (var command = new SqlCommand("INSERT INTO Accounts (UserName, AccountNumber, Password, Balance, RegisterDate) VALUES (@UserName, @AccountNumber, @Password, @Balance, @RegisterDate)", connection))
                 {
                     command.Parameters.AddWithValue("@UserName", accounts.UserName);
                     command.Parameters.AddWithValue("@AccountNumber", accounts.AccountNumber);
@@ -39,7 +39,7 @@ namespace Model.DAL
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new SqlCommand("SELECT * FROM Accountss WHERE UserName = @UserName", connection))
+                using (var command = new SqlCommand("SELECT * FROM Accounts WHERE UserName = @UserName", connection))
                 {
                     command.Parameters.AddWithValue("@UserName", loginName);
                     using (var reader = command.ExecuteReader())

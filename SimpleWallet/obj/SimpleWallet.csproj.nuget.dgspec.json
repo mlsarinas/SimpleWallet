@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\SimpleWallet.csproj": {}
+    "d:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\SimpleWallet.csproj": {}
   },
   "projects": {
-    "D:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\SimpleWallet.csproj": {
+    "d:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\SimpleWallet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\SimpleWallet.csproj",
+        "projectUniqueName": "d:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\SimpleWallet.csproj",
         "projectName": "SimpleWallet",
-        "projectPath": "D:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\SimpleWallet.csproj",
+        "projectPath": "d:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\SimpleWallet.csproj",
         "packagesPath": "C:\\Users\\danic\\.nuget\\packages\\",
-        "outputPath": "D:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\obj\\",
+        "outputPath": "d:\\acer\\Documents\\Lino\\Projects\\SimpleWallet\\SimpleWallet\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\danic\\AppData\\Roaming\\NuGet\\NuGet.Config"

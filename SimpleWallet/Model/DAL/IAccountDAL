@@ -1,7 +1,11 @@
-namespace Model.DAL
+namespace DAL
 {
     public interface IAccountDAL
     {
-        
+        public void RegisterAccounts(Accounts accounts);
+        public Accounts GetAccountsByLoginName(string loginName);
+        public void UpdateAccounts(Accounts account);
+        public void AddTransaction(Transactions transaction);
+        public List<Transactions> GetTransactionsByAccountNumber(string accountNumber);
     }
 }

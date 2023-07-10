@@ -1,6 +1,5 @@
-using Model.DAL;
+using DBModels.DAL;
 public class AccountRegistration
-
 {
     private IAccountDAL _accountDAL;
     public AccountRegistration(IAccountDAL accountDAL)
