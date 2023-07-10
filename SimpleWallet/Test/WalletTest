@@ -26,12 +26,12 @@ namespace WalletSystemTests
         }
 
         [TestMethod]
-        public void RegisterUser_NewUser_UserRegisteredSuccessfully()
+        public void RegisterAccount_NewAccount_AccountRegisteredSuccessfully()
         {
             // Arrange
-            var user = new User
+            var account = new Accounts
             {
-                LoginName = "testuser",
+                LoginName = "testAccount",
                 AccountNumber = GenerateAccountNumber(),
                 Password = "password123",
                 Balance = 0,
@@ -39,36 +39,36 @@ namespace WalletSystemTests
             };
 
             // Act
-            _repository.RegisterUser(user);
-            var registeredUser = _repository.GetUserByLoginName(user.LoginName);
+            _repository.RegisterAccount(account);
+            var registeredAccount = _repository.GetAccountByLoginName(account.LoginName);
 
             // Assert
-            Assert.IsNotNull(registeredUser);
-            Assert.AreEqual(user.LoginName, registeredUser.LoginName);
+            Assert.IsNotNull(registeredAccount);
+            Assert.AreEqual(account.LoginName, registeredAccount.LoginName);
         }
 
         [TestMethod]
-        public void UpdateUser_BalanceUpdatedSuccessfully()
+        public void UpdateAccount_BalanceUpdatedSuccessfully()
         {
             // Arrange
-            var user = _repository.GetUserByLoginName("testuser");
-            if (user != null)
+            var account = _repository.GetAccountByLoginName("testAccount");
+            if (account != null)
             {
-                var initialBalance = user.Balance;
+                var initialBalance = account.Balance;
                 var depositAmount = 100;
 
                 // Act
-                user.Balance += depositAmount;
-                _repository.UpdateUser(user);
-                var updatedUser = _repository.GetUserByLoginName(user.LoginName);
+                account.Balance += depositAmount;
+                _repository.UpdateAccount(Aaccountcount);
+                var updatedAccount = _repository.GetAccountByLoginName(account.LoginName);
 
                 // Assert
-                Assert.IsNotNull(updatedUser);
-                Assert.AreEqual(initialBalance + depositAmount, updatedUser.Balance);
+                Assert.IsNotNull(updatedAccount);
+                Assert.AreEqual(initialBalance + depositAmount, updatedAccount.Balance);
             }
             else
             {
-                Assert.Fail("User not found.");
+                Assert.Fail("Account not found.");
             }
         }
 
@@ -76,8 +76,8 @@ namespace WalletSystemTests
         public void AddTransaction_TransactionAddedSuccessfully()
         {
             // Arrange
-            var sender = _repository.GetUserByLoginName("testuser");
-            var receiver = _repository.GetUserByLoginName("jane_smith");
+            var sender = _repository.GetAccountByLoginName("testAccount");
+            var receiver = _repository.GetAccountByLoginName("jane_smith");
             if (sender != null && receiver != null)
             {
                 var initialSenderBalance = sender.Balance;
@@ -85,21 +85,21 @@ namespace WalletSystemTests
                 var transferAmount = 50;
 
                 // Act
-                var transactionFrom = new Transaction
+                var transactionFrom = new Transactions
                 {
                     TransactionType = "Transfer",
                     Amount = transferAmount,
                     AccountNumberFrom = sender.AccountNumber,
-                    AccountNumberTo = receiver.AccountNumber,
+                    ToAccountId = receiver.AccountNumber,
                     DateOfTransaction = DateTime.Now,
                     EndBalance = sender.Balance - transferAmount
                 };
-                var transactionTo = new Transaction
+                var transactionTo = new Transactions
                 {
                     TransactionType = "Transfer",
                     Amount = transferAmount,
-                    AccountNumberFrom = sender.AccountNumber,
-                    AccountNumberTo = receiver.AccountNumber,
+                    FromAccountId = sender.AccountNumber,
+                    ToAccountId = receiver.AccountNumber,
                     DateOfTransaction = DateTime.Now,
                     EndBalance = receiver.Balance + transferAmount
                 };
@@ -108,8 +108,8 @@ namespace WalletSystemTests
                 _repository.AddTransaction(transactionTo);
 
                 // Assert
-                sender = _repository.GetUserByLoginName("testuser");
-                receiver = _repository.GetUserByLoginName("jane_smith");
+                sender = _repository.GetAccountByLoginName("testAccount");
+                receiver = _repository.GetAccountByLoginName("jane_smith");
 
                 Assert.IsNotNull(sender);
                 Assert.IsNotNull(receiver);

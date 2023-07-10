@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
+using DBModels;
+using WalletSystem;
 
 namespace WalletSystem
 {
@@ -16,7 +18,7 @@ namespace WalletSystem
             _repository = new WalletRepository(configuration);
 
             // Register a new user
-            var newUser = new User
+            var newAccount = new Accounts
             {
                 LoginName = "john_doe",
                 AccountNumber = GenerateAccountNumber(),
@@ -25,7 +27,7 @@ namespace WalletSystem
                 RegisterDate = DateTime.Now
             };
 
-            _repository.RegisterUser(newUser);
+            _repository.RegisterUser(newAccount);
 
             // Deposit/Withdraw from the user's account
             var user = _repository.GetUserByLoginName("john_doe");
@@ -54,23 +56,23 @@ namespace WalletSystem
                     _repository.UpdateUser(receiver);
 
                     // Add transaction records
-                    var transactionFrom = new Transaction
+                    var transactionFrom = new Transactions
                     {
                         TransactionType = "Transfer",
                         Amount = transferAmount,
-                        AccountNumberFrom = sender.AccountNumber,
-                        AccountNumberTo = receiver.AccountNumber,
+                        FromAccountId = sender.AccountNumber,
+                        ToAccountId = receiver.AccountNumber,
                         DateOfTransaction = DateTime.Now,
                         EndBalance = sender.Balance
                     };
                     _repository.AddTransaction(transactionFrom);
 
-                    var transactionTo = new Transaction
+                    var transactionTo = new Transactions
                     {
                         TransactionType = "Transfer",
                         Amount = transferAmount,
-                        AccountNumberFrom = sender.AccountNumber,
-                        AccountNumberTo = receiver.AccountNumber,
+                        FromAccountId = sender.AccountNumber,
+                        ToAccountId = receiver.AccountNumber,
                         DateOfTransaction = DateTime.Now,
                         EndBalance = receiver.Balance
                     };
@@ -84,9 +86,8 @@ namespace WalletSystem
             {
                 Console.WriteLine($"Transaction Type: {transaction.TransactionType}");
                 Console.WriteLine($"Amount: {transaction.Amount}");
-                Console.WriteLine($"Account Number (From): {transaction.AccountNumberFrom}");
-                Console.WriteLine($"Account Number (To): {transaction.AccountNumber```csharp
-                .AccountNumberTo}");
+                Console.WriteLine($"Account Number (From): {transaction.FromAccountId}");
+                Console.WriteLine($"Account Number (To): {transaction.ToAccountId}");
                 Console.WriteLine($"Date of Transaction: {transaction.DateOfTransaction}");
                 Console.WriteLine($"End Balance: {transaction.EndBalance}");
                 Console.WriteLine();
@@ -96,7 +97,7 @@ namespace WalletSystem
         private static string GenerateAccountNumber()
         {
             var random = new Random();
-            return random.Next(100000000000, 999999999999).ToString();
+            return random.Next(1000000000, 999999999).ToString();
         }
     }
 }
